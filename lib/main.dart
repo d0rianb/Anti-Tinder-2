@@ -1,8 +1,12 @@
-import 'dart:math';
+import 'package:anti_tinder_2/profile.dart';
 import 'package:flutter/material.dart';
-import 'package:swipe_cards/swipe_cards.dart';
+import 'package:event_bus/event_bus.dart';
 
-import 'card-content.dart';
+import 'routes/chat-page.dart';
+import 'routes/home-page.dart';
+import 'routes/profile-page.dart';
+
+EventBus eventBus = EventBus();
 
 void main() {
   runApp(const App());
@@ -11,7 +15,6 @@ void main() {
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,106 +23,54 @@ class App extends StatelessWidget {
         primarySwatch: Colors.red,
         primaryColor: Colors.red[900],
       ),
-      home: const HomePage(),
+      routes: {
+        '/': (context) => const BasePage(),
+      },
+      initialRoute: '/',
       locale: const Locale.fromSubtags(languageCode: 'fr'),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class BasePage extends StatefulWidget {
+  const BasePage({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => HomePageState();
+  State<BasePage> createState() => BasePageState();
 }
 
-class HomePageState extends State<HomePage> {
-  final List<String> testSwipes = ['Dorian', 'Etienne', 'Le Jack', 'Lina', 'Louna', 'Lou Rival'];
-  late MatchEngine matchEngine;
-  late List<SwipeItem> swipeItems;
+class BasePageState extends State<BasePage> {
+  final Color mainColor = Colors.red[900]!;
+  final Map<int, Widget> pageMap = {
+    0: ProfilePage(Profile(id: 1, name: 'Dorian', age: 22, description: 'J\'aime Anne Hidalgo, et me battre', place: 'Paris', imgLink: 'https://placebeard.it/250x250')),
+    1: const HomePage(),
+    2: const ChatPage(),
+  };
+  int currentItemIndex = 1;
 
-  List<SwipeItem> getSwipeItems() => testSwipes
-      .map((name) => SwipeItem(
-            content: CardContent(
-              name: name,
-              age: 22,
-              place: 'Paris',
-              description: 'J\'aime Anne Hidalgo, et me battre',
-              image: NetworkImage('https://picsum.photos/250?image=${Random().nextInt(10)}'),
-            ),
-          ))
-      .toList();
+  Widget? buildBody() => pageMap[currentItemIndex];
 
   @override
-  void initState() {
-    swipeItems = getSwipeItems();
-    matchEngine = MatchEngine(swipeItems: swipeItems);
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Anti Tinder'),
+  Widget build(BuildContext context) => SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Anti Tinder'),
+            backgroundColor: mainColor,
+          ),
+          body: buildBody(),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: currentItemIndex,
+            selectedItemColor: mainColor,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profil'),
+              BottomNavigationBarItem(icon: Icon(Icons.sports_kabaddi), label: 'Baggare'),
+              BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Messages'),
+            ],
+            onTap: (index) {
+              setState(() => currentItemIndex = index);
+            },
+          ),
         ),
-        body: Center(
-          child: Column(children: [
-            Expanded(
-              child: SwipeCards(
-                key: UniqueKey(),
-                matchEngine: matchEngine,
-                onStackFinished: () {},
-                upSwipeAllowed: false,
-                fillSpace: false,
-                itemBuilder: (BuildContext context, int index) {
-                  final CardContent item = swipeItems[index].content!;
-                  return item.build(context);
-                },
-                itemChanged: (item, index) {},
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Ink(
-                    decoration: const ShapeDecoration(color: Colors.lightBlue, shape: CircleBorder()),
-                    child: IconButton(
-                      icon: const Icon(Icons.cancel),
-                      color: Colors.white,
-                      onPressed: () {},
-                    ),
-                  ),
-                  Ink(
-                    decoration: const ShapeDecoration(color: Colors.lightBlue, shape: CircleBorder()),
-                    child: IconButton(
-                      icon: const Icon(Icons.android),
-                      color: Colors.white,
-                      onPressed: () {},
-                    ),
-                  ),
-                  Ink(
-                    decoration: const ShapeDecoration(color: Colors.yellow, shape: CircleBorder()),
-                    child: IconButton(
-                      icon: const Icon(Icons.star),
-                      color: Colors.white,
-                      onPressed: () {},
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ]),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profil'),
-            BottomNavigationBarItem(icon: Icon(Icons.sports_kabaddi), label: 'Baggare'),
-            BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Messages'),
-          ],
-        ));
-  }
+      );
 }

@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
 
-class CardContent {
-  final String name;
-  final int age;
-  final String place;
-  final String description;
-  final NetworkImage image;
+import 'profile.dart';
 
-  CardContent({
-    required this.name,
-    required this.age,
-    required this.place,
-    required this.description,
-    required this.image,
-  });
+class CardContent {
+  Profile profile;
+  NetworkImage image;
+
+  CardContent(this.profile) : image = NetworkImage(profile.imgLink);
 
   Widget build(BuildContext context) {
     return Card(
@@ -43,11 +36,11 @@ class CardContent {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(name + ', ' + age.toString(), textAlign: TextAlign.left, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text(place, textAlign: TextAlign.left, style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
+                  Text(profile.name + ', ' + profile.age.toString(), textAlign: TextAlign.left, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(profile.place, textAlign: TextAlign.left, style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
                 ],
               ),
-              Text(description, textAlign: TextAlign.left, style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
+              Text(profile.description, textAlign: TextAlign.left, style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
             ],
           ),
         )
